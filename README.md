@@ -23,6 +23,10 @@ Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-T
 ## Installation
 
 ```bash
+# Install showboat (required for generating walkthroughs)
+uv tool install showboat  # or: pip install showboat
+
+# Clone and copy the skills
 git clone https://github.com/Kartik0110-lgtm/walkthrough.git
 cp -r walkthrough/walkthrough ~/.claude/skills/walkthrough
 cp -r walkthrough/walkthrough-render ~/.claude/skills/walkthrough-render
@@ -31,6 +35,8 @@ cp -r walkthrough/walkthrough-render ~/.claude/skills/walkthrough-render
 Or symlink if you want to pull updates later:
 
 ```bash
+uv tool install showboat
+
 git clone https://github.com/Kartik0110-lgtm/walkthrough.git ~/walkthrough-skills
 ln -s ~/walkthrough-skills/walkthrough ~/.claude/skills/walkthrough
 ln -s ~/walkthrough-skills/walkthrough-render ~/.claude/skills/walkthrough-render
