@@ -1,99 +1,110 @@
-# Walkthrough — Claude Code Skills
+# Walkthrough
 
-Two skills for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that generate deep technical walkthroughs of any codebase and render them into polished, interactive HTML readers.
+A pair of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that generate deep technical walkthroughs of any codebase and render them into polished, interactive HTML readers.
 
-**`/walkthrough`** explores your codebase and produces a comprehensive `WALKTHROUGH.md` — a 10-chapter technical document written for smart readers who want to genuinely understand how a system works.
+## What This Does
 
-**`/walkthrough-render`** takes that markdown and renders it into a self-contained HTML reader with a sidebar, editorial callouts, compact code snippets, and a project-specific quiz.
+**Walkthrough** turns any codebase into a 10-chapter technical document that explains how the system actually works — from the inside out. Not a summary. Not an overview. A real walkthrough, with actual code snippets captured from the repo, written for someone who wants to build a genuine mental model of the architecture.
 
-## What you get
+Then it renders that document into a self-contained HTML reader you can open in any browser.
 
-- A 10-chapter walkthrough covering: project overview, tech stack, entry point, file structure, core modules, data flow, design patterns, error handling, tests, and mental model
-- A polished HTML reader with dark theme, chapter navigation, reading progress, and collapsible sidebar
-- Editorial callouts (insight/pattern) that surface non-obvious architectural decisions
-- A 10-question quiz (6 multiple-choice + 4 design-thinking scenarios) tailored to the specific codebase
+Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-Tap-2), generated entirely by these two skills:
 
-## Prerequisites
+![Reader overview — Chapter 1 with sidebar navigation](assets/reader-overview.png)
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
-- [showboat](https://github.com/benbucksch/showboat) — install with `uv tool install showboat` or `pip install showboat`
-- Node.js (for the render build script)
+![Code blocks with syntax-highlighted COMMAND/OUTPUT pairs](assets/reader-code.png)
+
+![Interactive quiz with tiered questions](assets/reader-quiz.png)
+
+### Key Features
+
+- **Real Code, Not Paraphrases** — Every code block comes from a `showboat exec` command run against the actual repo. Nothing is copy-pasted or invented.
+- **Zero Dependencies** — The rendered HTML is a single file. No npm, no build tools, no frameworks. Opens in any browser, works in 10 years.
+- **Editorial Callouts** — Each chapter gets an insight or pattern callout that names something the reader absorbed passively but didn't consciously notice.
+- **Project-Specific Quiz** — 6 multiple-choice questions testing architectural intuition + 4 design-thinking scenarios with collapsible answers. Every question is tailored to the specific codebase.
+- **Dark Theme Reader** — Sidebar navigation, reading progress, chapter switching, collapsible sections, confetti on a perfect quiz score.
 
 ## Installation
 
-Copy both skill directories into your Claude Code skills folder:
+Clone and copy to your Claude Code skills directory:
 
 ```bash
-# Clone this repo
 git clone https://github.com/Kartik0110-lgtm/walkthrough.git
-
-# Copy skills to your Claude Code skills directory
 cp -r walkthrough/walkthrough ~/.claude/skills/walkthrough
 cp -r walkthrough/walkthrough-render ~/.claude/skills/walkthrough-render
 ```
 
-Or if you prefer a symlink approach:
+Or symlink if you want to pull updates later:
 
 ```bash
 git clone https://github.com/Kartik0110-lgtm/walkthrough.git ~/walkthrough-skills
-
 ln -s ~/walkthrough-skills/walkthrough ~/.claude/skills/walkthrough
 ln -s ~/walkthrough-skills/walkthrough-render ~/.claude/skills/walkthrough-render
 ```
 
-After installation, restart Claude Code. The skills should appear when you type `/walkthrough` or `/walkthrough-render`.
+Restart Claude Code. You should see `/walkthrough` and `/walkthrough-render` when you type `/`.
 
 ## Usage
 
-### Step 1: Generate the walkthrough
+### Step 1: Generate
 
-Navigate to any project directory and run:
+Navigate to any project and run:
 
 ```
 /walkthrough
 ```
 
-This explores the codebase and produces `WALKTHROUGH.md` in the current directory. Takes a few minutes depending on codebase size.
+This explores the codebase and writes `WALKTHROUGH.md` — a ~1,500-line document covering project overview, tech stack, entry point, file structure, core modules, data flow, design patterns, error handling, tests, and a closing mental model.
 
-You can optionally pass a focus area:
+You can optionally focus on a specific area:
 
 ```
 /walkthrough "focus on the authentication system"
 ```
 
-### Step 2: Render the HTML reader
-
-Once `WALKTHROUGH.md` exists, run:
+### Step 2: Render
 
 ```
 /walkthrough-render
 ```
 
-This generates `walkthrough-reader.html` and opens it in your browser. The file is fully self-contained (no external dependencies except Google Fonts CDN).
+This reads `WALKTHROUGH.md`, generates a Node.js build script, injects everything into the HTML template, validates the output, and opens the reader in your browser.
 
-## File structure
+## Architecture
 
-```
-walkthrough/
-  SKILL.md              # The /walkthrough skill instructions
+The skill uses **two-phase generation** — markdown first, HTML second. This keeps each phase focused and debuggable.
 
-walkthrough-render/
-  SKILL.md              # The /walkthrough-render skill instructions
-  template.html         # HTML reader template with %%PLACEHOLDER%% injection points
-  examples/
-    nutshell-callouts.md  # Example callout patterns
-```
+| File | Purpose | Used When |
+|------|---------|-----------|
+| `walkthrough/SKILL.md` | Generates `WALKTHROUGH.md` using showboat | `/walkthrough` |
+| `walkthrough-render/SKILL.md` | Renders markdown into HTML reader | `/walkthrough-render` |
+| `walkthrough-render/template.html` | HTML template with `%%PLACEHOLDER%%` injection points | `/walkthrough-render` |
 
-## How it works
+The render skill generates a Node.js build script that handles:
+- `safeReplace()` for all placeholder injections (avoids `$`-substitution bugs in `String.replace()`)
+- `<script>` and `</script>` escaping in markdown content (walkthroughs of web projects contain HTML snippets that break the parser)
+- `JSON.stringify()` for all prose content (the only safe way to handle apostrophes and special characters)
+- Three-part validation before opening the browser (script tag count, JS syntax, no remaining placeholders)
 
-**`/walkthrough`** uses `showboat` to build an executable document. It reads your codebase, plans 10 chapters, and uses `showboat exec` to capture real code snippets (never paraphrased). Every code block in the output comes from an actual command run against your project.
+## Philosophy
 
-**`/walkthrough-render`** generates a Node.js build script that:
-1. Reads `WALKTHROUGH.md` and `template.html`
-2. Injects chapter definitions, editorial callouts, compact replacements, and a custom quiz
-3. Escapes `<script>` tags in the markdown content (critical for walkthroughs of web projects)
-4. Uses `safeReplace()` instead of `String.replace()` to avoid `$`-substitution bugs
-5. Validates the output (script tag count, JS syntax, no remaining placeholders) before opening the browser
+1. **Treat the reader as smart but new.** Use the real vocabulary — "goroutine", "middleware", "closure" — but explain it properly the first time. Never dumb things down.
+
+2. **Show the actual code.** Every snippet is captured by running a command against the real repo. If you can't show it, don't claim it.
+
+3. **Name the patterns.** "Defensive Automation", "Multi-Selector Fallback", "Pipeline with Side-Channel Updates" — giving a pattern a name makes it transferable to other codebases.
+
+4. **The quiz tests understanding, not memory.** A reader who memorized bullet points should not automatically get all six right.
+
+## Requirements
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+- [showboat](https://pypi.org/project/showboat/) — `uv tool install showboat` or `pip install showboat`
+- Node.js (for the render build script)
+
+## Credits
+
+Created by [@Kartik0110-lgtm](https://github.com/Kartik0110-lgtm) with Claude Code.
 
 ## License
 
