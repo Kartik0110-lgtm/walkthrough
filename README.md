@@ -14,7 +14,7 @@ Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-T
 
 ## Key Features
 
-- **Real Code, Not Paraphrases** — Every code block is captured by running a command against the actual repo using [showboat](https://pypi.org/project/showboat/), a CLI tool for building executable documents. Nothing is invented or copy-pasted.
+- **Real Code, Not Paraphrases** — Every code block is captured by running a command against the actual repo using [showboat](https://pypi.org/project/showboat/), a CLI tool for building executable documents that show and prove an agent's work. Nothing is invented or copy-pasted.
 - **10-Chapter Structure** — Project overview, tech stack, entry point, file structure, core modules, data flow, design patterns, error handling, tests, and a closing mental model that ties it all together.
 - **Editorial Callouts** — Each chapter gets an insight or pattern callout that names something the reader absorbed but didn't consciously notice. "Defensive Automation", "Pipeline with Side-Channel Updates" — giving patterns a name makes them transferable.
 - **Project-Specific Quiz** — 6 multiple-choice questions testing architectural intuition + 4 design-thinking scenarios with collapsible answers. Every question is written specifically for the walkthrough to test your understanding.
