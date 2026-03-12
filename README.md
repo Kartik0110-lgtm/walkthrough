@@ -1,14 +1,10 @@
 # Walkthrough
 
-A pair of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that generate deep technical walkthroughs of any codebase and render them into polished, interactive HTML readers.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that generates a deep, honest technical walkthrough of any codebase — then renders it into an interactive HTML reader you can open in your browser.
 
-## What This Does
+Built for people who use AI coding agents to build things and want to actually understand what got built. Not a summary. Not generated docs. A real walkthrough that treats you as smart, uses the real vocabulary, and shows you the actual code.
 
-**Walkthrough** turns any codebase into a 10-chapter technical document that explains how the system actually works — from the inside out. Not a summary. Not an overview. A real walkthrough, with actual code snippets captured from the repo, written for someone who wants to build a genuine mental model of the architecture.
-
-Then it renders that document into a self-contained HTML reader you can open in any browser.
-
-Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-Tap-2), generated entirely by these two skills:
+Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-Tap-2), generated entirely by this skill:
 
 ![Reader overview — Chapter 1 with sidebar navigation](assets/reader-overview.png)
 
@@ -16,17 +12,15 @@ Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-T
 
 ![Interactive quiz with tiered questions](assets/reader-quiz.png)
 
-### Key Features
+## Key Features
 
-- **Real Code, Not Paraphrases** — Every code block comes from a `showboat exec` command run against the actual repo. Nothing is copy-pasted or invented.
-- **Zero Dependencies** — The rendered HTML is a single file. No npm, no build tools, no frameworks. Opens in any browser, works in 10 years.
-- **Editorial Callouts** — Each chapter gets an insight or pattern callout that names something the reader absorbed passively but didn't consciously notice.
-- **Project-Specific Quiz** — 6 multiple-choice questions testing architectural intuition + 4 design-thinking scenarios with collapsible answers. Every question is tailored to the specific codebase.
-- **Dark Theme Reader** — Sidebar navigation, reading progress, chapter switching, collapsible sections, confetti on a perfect quiz score.
+- **Real Code, Not Paraphrases** — Every code block is captured by running a command against the actual repo using [showboat](https://pypi.org/project/showboat/), a CLI tool for building executable documents. Nothing is invented or copy-pasted.
+- **10-Chapter Structure** — Project overview, tech stack, entry point, file structure, core modules, data flow, design patterns, error handling, tests, and a closing mental model that ties it all together.
+- **Editorial Callouts** — Each chapter gets an insight or pattern callout that names something the reader absorbed but didn't consciously notice. "Defensive Automation", "Pipeline with Side-Channel Updates" — giving patterns a name makes them transferable.
+- **Project-Specific Quiz** — 6 multiple-choice questions testing architectural intuition + 4 design-thinking scenarios with collapsible answers. Every question is written specifically for the codebase being walked through.
+- **Self-Contained Reader** — The output is a single HTML file with dark theme, sidebar navigation, reading progress tracking, and confetti on a perfect quiz score. No build tools, no dependencies.
 
 ## Installation
-
-Clone and copy to your Claude Code skills directory:
 
 ```bash
 git clone https://github.com/Kartik0110-lgtm/walkthrough.git
@@ -46,15 +40,15 @@ Restart Claude Code. You should see `/walkthrough` and `/walkthrough-render` whe
 
 ## Usage
 
-### Step 1: Generate
+### Step 1: Generate the walkthrough
 
-Navigate to any project and run:
+Navigate to any project directory and run:
 
 ```
 /walkthrough
 ```
 
-This explores the codebase and writes `WALKTHROUGH.md` — a ~1,500-line document covering project overview, tech stack, entry point, file structure, core modules, data flow, design patterns, error handling, tests, and a closing mental model.
+This explores the codebase and writes `WALKTHROUGH.md` — a comprehensive technical document with real code snippets captured from the repo.
 
 You can optionally focus on a specific area:
 
@@ -62,39 +56,29 @@ You can optionally focus on a specific area:
 /walkthrough "focus on the authentication system"
 ```
 
-### Step 2: Render
+### Step 2: Render the reader
 
 ```
 /walkthrough-render
 ```
 
-This reads `WALKTHROUGH.md`, generates a Node.js build script, injects everything into the HTML template, validates the output, and opens the reader in your browser.
+This reads `WALKTHROUGH.md`, injects it into the HTML reader template with chapter definitions, editorial callouts, and a custom quiz, validates the output, and opens it in your browser.
 
 ## Architecture
 
-The skill uses **two-phase generation** — markdown first, HTML second. This keeps each phase focused and debuggable.
+| File | Purpose |
+|------|---------|
+| `walkthrough/SKILL.md` | Explores the codebase and generates `WALKTHROUGH.md` using showboat |
+| `walkthrough-render/SKILL.md` | Renders the markdown into an interactive HTML reader |
+| `walkthrough-render/template.html` | The HTML reader template with `%%PLACEHOLDER%%` injection points |
 
-| File | Purpose | Used When |
-|------|---------|-----------|
-| `walkthrough/SKILL.md` | Generates `WALKTHROUGH.md` using showboat | `/walkthrough` |
-| `walkthrough-render/SKILL.md` | Renders markdown into HTML reader | `/walkthrough-render` |
-| `walkthrough-render/template.html` | HTML template with `%%PLACEHOLDER%%` injection points | `/walkthrough-render` |
-
-The render skill generates a Node.js build script that handles:
-- `safeReplace()` for all placeholder injections (avoids `$`-substitution bugs in `String.replace()`)
-- `<script>` and `</script>` escaping in markdown content (walkthroughs of web projects contain HTML snippets that break the parser)
-- `JSON.stringify()` for all prose content (the only safe way to handle apostrophes and special characters)
-- Three-part validation before opening the browser (script tag count, JS syntax, no remaining placeholders)
+The render phase generates a Node.js build script that handles `<script>` tag escaping (walkthroughs of web projects contain HTML that breaks the parser), `safeReplace()` for placeholder injection (avoids `$`-substitution bugs), and three-part validation before opening the browser.
 
 ## Philosophy
 
-1. **Treat the reader as smart but new.** Use the real vocabulary — "goroutine", "middleware", "closure" — but explain it properly the first time. Never dumb things down.
+This skill exists because of a gap: you can use AI agents to build ambitious software, but the result is a codebase you don't fully understand. Reading the code file by file doesn't give you the mental model. Generated docs are too shallow. What you actually need is someone to sit down and walk you through it — explain the why behind every decision, show you the real code, and test whether you actually got it.
 
-2. **Show the actual code.** Every snippet is captured by running a command against the real repo. If you can't show it, don't claim it.
-
-3. **Name the patterns.** "Defensive Automation", "Multi-Selector Fallback", "Pipeline with Side-Channel Updates" — giving a pattern a name makes it transferable to other codebases.
-
-4. **The quiz tests understanding, not memory.** A reader who memorized bullet points should not automatically get all six right.
+That's what this does. The reader is written for someone who is smart and curious, not technical yet but actively trying to be. It uses the real vocabulary — "closure", "middleware", "decorator stack" — and explains each term properly the first time. The goal is that after reading, you've learned something real and durable, not just got a vague feel for things.
 
 ## Requirements
 
@@ -108,4 +92,4 @@ Created by [@Kartik0110-lgtm](https://github.com/Kartik0110-lgtm) with Claude Co
 
 ## License
 
-MIT
+MIT — Use it, modify it, share it.
