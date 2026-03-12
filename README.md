@@ -1,8 +1,8 @@
 # Walkthrough
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that generates a deep, honest technical walkthrough of any codebase — then renders it into an interactive HTML reader you can open in your browser.
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that generates a deep technical walkthrough of any codebase — then renders it into an interactive HTML reader you can open in your browser.
 
-Built for people who use AI coding agents to build things and want to actually understand what got built. Not a summary. Not generated docs. A real walkthrough that treats you as smart, uses the real vocabulary, and shows you the actual code.
+Built for people who use AI coding agents to build things and want to actually understand what got built. Not a summary. Not surface level explanations. A real walkthrough that treats you as smart, uses the real vocabulary, and shows you the actual code.
 
 Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-Tap-2), generated entirely by this skill:
 
@@ -17,8 +17,8 @@ Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-T
 - **Real Code, Not Paraphrases** — Every code block is captured by running a command against the actual repo using [showboat](https://pypi.org/project/showboat/), a CLI tool for building executable documents. Nothing is invented or copy-pasted.
 - **10-Chapter Structure** — Project overview, tech stack, entry point, file structure, core modules, data flow, design patterns, error handling, tests, and a closing mental model that ties it all together.
 - **Editorial Callouts** — Each chapter gets an insight or pattern callout that names something the reader absorbed but didn't consciously notice. "Defensive Automation", "Pipeline with Side-Channel Updates" — giving patterns a name makes them transferable.
-- **Project-Specific Quiz** — 6 multiple-choice questions testing architectural intuition + 4 design-thinking scenarios with collapsible answers. Every question is written specifically for the codebase being walked through.
-- **Self-Contained Reader** — The output is a single HTML file with dark theme, sidebar navigation, reading progress tracking, and confetti on a perfect quiz score. No build tools, no dependencies.
+- **Project-Specific Quiz** — 6 multiple-choice questions testing architectural intuition + 4 design-thinking scenarios with collapsible answers. Every question is written specifically for the walkthrough to test your understanding.
+- **Self-Contained Reader** — Raw Markdown files are very boring and clunky, so you can read the walkthrough in a single HTML reader with dark theme, sidebar navigation, reading progress tracking, and a special suprise after you attempt the quiz.
 
 ## Installation
 
@@ -48,7 +48,7 @@ Navigate to any project directory and run:
 /walkthrough
 ```
 
-This explores the codebase and writes `WALKTHROUGH.md` — a comprehensive technical document with real code snippets captured from the repo.
+This explores the codebase and writes `WALKTHROUGH.md` — a comprehensive technical document with real code snippets captured (using showboat) from the repo.
 
 You can optionally focus on a specific area:
 
@@ -76,7 +76,7 @@ The render phase generates a Node.js build script that handles `<script>` tag es
 
 ## Philosophy
 
-This skill exists because of a gap: you can use AI agents to build ambitious software, but the result is a codebase you don't fully understand. Reading the code file by file doesn't give you the mental model. Generated docs are too shallow. What you actually need is someone to sit down and walk you through it — explain the why behind every decision, show you the real code, and test whether you actually got it.
+This skill exists because of a gap: you can use AI agents to build ambitious software, but the result is a codebase you don't fully understand. Reading the code file by file doesn't give you the mental model. Surface level explainers are too shallow. What you actually need is someone to sit down and walk you through it — explain the why behind every decision, show you the real code, and test whether you actually got it.
 
 That's what this does. The reader is written for someone who is smart and curious, not technical yet but actively trying to be. It uses the real vocabulary — "closure", "middleware", "decorator stack" — and explains each term properly the first time. The goal is that after reading, you've learned something real and durable, not just got a vague feel for things.
 
