@@ -4,7 +4,7 @@ A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that gener
 
 Built for people who use AI coding agents to build things and want to actually understand what got built. Not a summary. Not surface level explanations. A real walkthrough that treats you as smart, uses the real vocabulary, and shows you the actual code.
 
-Here's a walkthrough of [Kirana Tap](https://github.com/Kartik0110-lgtm/Kirana-Tap-2), generated entirely by this skill:
+Here's a walkthrough of [Nutshell](https://github.com/Kartik0110-lgtm/Nutshell), generated entirely by this skill:
 
 ![Reader overview — Chapter 1 with sidebar navigation](assets/reader-overview.png)
 

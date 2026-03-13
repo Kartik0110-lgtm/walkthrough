@@ -62,12 +62,19 @@ The template metadata row (shown only on Chapter 1) displays `%%AUTHOR_NAME%% & 
 Read the full content of `WALKTHROUGH.md` and produce the value with:
 
 ```js
+// CRITICAL: use String.fromCharCode(92) to get a literal backslash.
+// Writing '<\\u003c' in Node.js source DOES NOT WORK — Node resolves \u003c to '<' at parse time.
+const bslash = String.fromCharCode(92);
 const RAW_MD = JSON.stringify(fs.readFileSync('WALKTHROUGH.md', 'utf8'))
-  .replace(/<\/script>/gi, '<\\/script>')
-  .replace(/<script/gi, '<\\script');
+  .replace(/<\/script>/gi, bslash + 'u003c/script>')
+  .replace(/<script/gi, bslash + 'u003cscript');
 ```
 
 **Why the `<script>` / `</script>` escapes are mandatory:** The HTML parser scans raw bytes for both `<script` and `</script>` — it does not care that the tag is inside a JavaScript string. Any walkthrough of a web project will likely contain HTML snippets with `<script src="..."></script>` tags (from showboat capturing real code). Without these escapes, the HTML parser will either open new script contexts (for `<script` tags) or close the existing `<script>` block prematurely (for `</script>` tags), splitting the application JS into broken fragments. The page will load with an empty content area and "Invalid or unexpected token" errors in the console — with no obvious indication of what went wrong.
+
+**Why `String.fromCharCode(92)` instead of backslash literals:** Node.js resolves all escape sequences (`\u003c`, `\s`, `\\`) at string construction time — before `.replace()` ever runs. This means `'<\\script'` becomes `<script` (unchanged) and `'<\\u003cscript'` also becomes `<script`. The only way to get a literal `\u003c` into the output file is to build the backslash character at runtime with `String.fromCharCode(92)`. The browser's JS engine then sees `\u003c` in the JSON string and correctly resolves it to `<` when parsing.
+
+**Also escape `<script>` in quiz option text:** If any quiz MC option or feedback mentions `<script>`, use `&lt;script&gt;` instead — the quiz HTML is injected outside of RAW_MD and doesn't go through the escaping pipeline.
 
 The injection replaces `%%RAW_MD%%` exactly — the surrounding `var RAW_MD =` and `;` are already in the template.
 
@@ -398,7 +405,7 @@ const scriptOpenCount = (html.match(/<script>/g) || []).length;
 const scriptCloseCount = (html.match(/<\/script>/g) || []).length;
 if (scriptOpenCount !== 2 || scriptCloseCount !== 2) {
   console.error(`✗ Expected 2 script blocks, found ${scriptOpenCount} open / ${scriptCloseCount} close tags.`);
-  console.error('  Likely cause: <script> or </script> inside RAW_MD — ensure you escaped with .replace(/<\\/script>/gi, "<\\\\/script>").replace(/<script/gi, "<\\\\script")');
+  console.error('  Likely cause: <script> or </script> inside RAW_MD or QUIZ_HTML — ensure RAW_MD uses String.fromCharCode(92) escaping, and quiz text uses &lt;script&gt;');
   process.exit(1);
 }
 
