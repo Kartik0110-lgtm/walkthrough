@@ -10,7 +10,7 @@ Here's a walkthrough of [Nutshell](https://github.com/Kartik0110-lgtm/Nutshell),
 
 ![Code blocks with syntax-highlighted COMMAND/OUTPUT pairs](assets/reader-code.png)
 
-<video src="assets/reader-quiz.mp4" autoplay loop muted playsinline></video>
+![Interactive quiz with tiered questions](assets/reader-quiz.png)
 
 ## Key Features
 
