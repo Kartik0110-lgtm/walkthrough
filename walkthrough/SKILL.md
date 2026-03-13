@@ -58,7 +58,7 @@ How does this codebase handle failure? Show the actual error handling patterns. 
 If tests exist, walk through the testing approach. What is being tested? What testing patterns are used? Show a representative test and explain what it's asserting and why that matters.
 
 ### 10. How it all connects — the mental model
-Close with a plain-English narrative that ties everything together. If you had to describe the whole system in one coherent paragraph, what would you say? What is the core loop or core abstraction that everything else serves? What would you want to remember about this codebase six months from now?
+Close with a plain-English narrative that ties everything together. **Open with a paragraph that summarizes what this project does and why it exists** — not architecture layers or implementation details. Think: "ProjectName is a [thing] that [does what] by [how]." If you had to describe the whole system in one coherent paragraph, what would you say? What is the core loop or core abstraction that everything else serves? What would you want to remember about this codebase six months from now?
 
 ## How to use showboat
 

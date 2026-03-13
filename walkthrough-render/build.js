@@ -15,10 +15,17 @@ function safeReplace(str, search, replacement) {
   return str.slice(0, idx) + replacement + str.slice(idx + search.length);
 }
 
+// Auto-generate heading regex from chapter number
+// '01' → /^## 1\./, '10' → /^## 10\./, '✦' → /^$NOMATCH$/
+function headingRegexFor(num) {
+  if (num === '\u2726') return '/^$NOMATCH$/';
+  const n = parseInt(num, 10);
+  return '/^## ' + n + '\\./';
+}
+
 // Emit a CHAPTER_DEFS entry as a JS object literal string
-function chap(num, label, title, subtitle, headingPattern) {
-  const headingRegex = '/' + headingPattern + '/';
-  return `{ num:${JSON.stringify(num)}, label:${JSON.stringify(label)}, title:${JSON.stringify(title)}, subtitle:${JSON.stringify(subtitle)}, heading:${headingRegex} }`;
+function chap(num, label, title, subtitle) {
+  return `{ num:${JSON.stringify(num)}, label:${JSON.stringify(label)}, title:${JSON.stringify(title)}, subtitle:${JSON.stringify(subtitle)}, heading:${headingRegexFor(num)} }`;
 }
 
 // Emit a CHAPTER_EXTRAS callout block
@@ -98,7 +105,7 @@ html = safeReplace(html, '%%RAW_MD%%', RAW_MD);
 // ── CHAPTER_DEFS ─────────────────────────────────────────────────────────────
 
 const CHAPTER_DEFS = '[\n' +
-  config.chapters.map(c => chap(c.num, c.label, c.title, c.subtitle, c.headingPattern)).join(',\n') +
+  config.chapters.map(c => chap(c.num, c.label, c.title, c.subtitle)).join(',\n') +
   '\n]';
 
 html = safeReplace(html, '%%CHAPTER_DEFS%%', CHAPTER_DEFS);
@@ -131,8 +138,15 @@ if (config.compactReplacements) {
 }
 
 // Closing chapter callout-box (wraps opening paragraph with $1 backreference)
+// Build the regex internally from plain openingWords — Claude never writes regex for this.
 if (config.closingChapterBox) {
   const cb = config.closingChapterBox;
+  // Escape any regex-special characters in the plain-text opening words
+  const escaped = cb.openingWords.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Build the pattern: capture <p>OPENING_WORDS...anything...</p>
+  // This string is placed directly between / / delimiters in the output JS,
+  // so it needs to be exactly what the browser's regex engine will see.
+  const pattern = '(<p>' + escaped + '[\\s\\S]*?<\\/p>)';
   // The replacement includes $1 to preserve the matched paragraph inside the box
   const replacement =
     '<div class="callout-box"><span class="callout-box-icon">\u{1F4D6}</span>' +
@@ -141,7 +155,7 @@ if (config.closingChapterBox) {
   compactLines.push(
     `  if (idx === ${cb.chapterIdx}) {\n` +
     `    rendered = rendered.replace(\n` +
-    `      /${cb.openingParagraphPattern}/,\n` +
+    `      /${pattern}/,\n` +
     `      ${JSON.stringify(replacement)}\n` +
     `    );\n` +
     `  }`
